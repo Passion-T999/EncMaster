@@ -87,6 +87,16 @@
         <p style="font-size: 0.7em; color: #555;">Direct EcoCash USD Transfer</p>
     </div>
 </div>
+        <!-- SECTION 3: WEB ENCRYPTOR -->
+<div class="section-card" style="border: 1px solid #2ecc71;">
+    <h2 style="margin-top:0; color: #2ecc71;">Web Encryptor</h2>
+    <p style="font-size: 0.85em; color: #bdc3c7;">No app? No problem. Lock your files right here in your browser.</p>
+    
+    <input type="file" id="encFile">
+    <input type="password" id="encPass" placeholder="Create a Strong Password">
+    <button class="btn-unlock" style="background: #2ecc71;" onclick="webEncrypt()">LOCK & DOWNLOAD .ENC</button>
+    <div id="encStatus" class="status">Files never leave your device.</div>
+</div>
 
         <!-- SECTION 2: MOBILE/WEB UNLOCKER -->
         <div class="section-card">
@@ -117,6 +127,30 @@
                 const a = document.createElement('a'); a.href = url; a.download = file.name.replace(".enc",""); a.click();
                 s.innerHTML = "✅ <span style='color:#2ecc71'>Success! Decrypted file downloaded.</span>";
             } catch(e) { s.innerHTML = "❌ <span style='color:#e74c3c'>Error: Wrong Password or invalid file.</span>"; }
+        }
+                async function webEncrypt() {
+            const file = document.getElementById('encFile').files[0];
+            const pass = document.getElementById('encPass').value;
+            const status = document.getElementById('encStatus');
+            if (!file || !pass) return alert("Select a file and set a password!");
+
+            status.innerText = "🔐 Securing file...";
+            try {
+                const salt = window.crypto.getRandomValues(new Uint8Array(16));
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const p_enc = new TextEncoder().encode(pass);
+                const m = await crypto.subtle.importKey("raw", p_enc, "PBKDF2", false, ["deriveKey"]);
+                const key = await crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:100000, hash:"SHA-256"}, m, {name:"AES-GCM", length:256}, false, ["encrypt"]);
+                
+                const data = await file.arrayBuffer();
+                const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv, tagLength:128}, key, data);
+
+                // This matches your C code format: Salt + IV + EncryptedData (which includes Tag)
+                const finalBlob = new Blob([salt, iv, new Uint8Array(encrypted)]);
+                const url = URL.createObjectURL(finalBlob);
+                const a = document.createElement('a'); a.href = url; a.download = file.name + ".enc"; a.click();
+                status.innerHTML = "✅ <span style='color:#2ecc71'>File Secured & Downloaded!</span>";
+            } catch(e) { status.innerText = "❌ Encryption failed."; }
         }
     </script>
 </body>
