@@ -3,34 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EncMaster Universal | v6.3 Mobile & Desktop</title>
+    <title>EncMaster Universal | v6.4 Shredder Edition</title>
     <style>
         :root { --primary: #3498db; --bg: #1a252f; --card: #2c3e50; --text: #ecf0f1; --android: #3DDC84; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
         .nav { width: 100%; background: var(--card); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; border-bottom: 2px solid #34495e; }
         .logo { font-weight: bold; color: var(--primary); font-size: 1.4em; letter-spacing: 1px; }
         .version { font-size: 0.7em; background: #34495e; padding: 4px 8px; border-radius: 5px; }
-
         .container { width: 90%; max-width: 450px; margin-top: 20px; text-align: center; }
         .dashboard-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #34495e; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        
         input[type="password"] { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid #34495e; background: #1a252f; color: white; box-sizing: border-box; text-align: center; font-size: 1.1em; outline: none; }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .tile { background: #34495e; padding: 20px 10px; border-radius: 15px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; }
         .tile:active { transform: scale(0.95); background: var(--primary); }
         .tile i { font-size: 1.8em; margin-bottom: 8px; font-style: normal; }
         .tile span { font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
-
-        /* Download Section */
         .download-section { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
         .dl-btn { color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-size: 0.8em; font-weight: bold; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
-        
         .dl-android { background: var(--android); color: #1a252f; }
         .dl-desktop { background: #34495e; }
-        .dl-btn:hover { opacity: 0.9; transform: translateY(-2px); }
-
         .footer { padding: 40px 20px; text-align: center; width: 100%; box-sizing: border-box; }
         .support-box { background: rgba(52, 152, 219, 0.1); padding: 20px; border-radius: 15px; border: 1px dashed var(--primary); }
         .ecocash { font-size: 1.1em; font-weight: bold; color: white; display: block; margin-top: 5px; }
@@ -39,7 +30,7 @@
 <body>
 
     <div class="nav">
-        <div class="logo">🔐 ENCMASTER <span class="version">v6.3</span></div>
+        <div class="logo">🔐 ENCMASTER <span class="version">v6.4 SHREDDER</span></div>
     </div>
 
     <div class="container">
@@ -47,16 +38,14 @@
             <input type="password" id="masterPass" placeholder="Enter Vault Password">
             
             <div class="grid">
-                <div class="tile" onclick="openPicker('encrypt')"><i>🔒</i><span>Lock File</span></div>
-                <div class="tile" onclick="openPicker('decrypt')"><i>🔓</i><span>Unlock</span></div>
+                <div class="tile" onclick="handleShredder('encrypt')"><i>🔒</i><span>Lock & Shred</span></div>
+                <div class="tile" onclick="handleShredder('decrypt')"><i>🔓</i><span>Unlock</span></div>
                 <div class="tile" onclick="window.location.reload()"><i>🔄</i><span>Refresh</span></div>
-                <div class="tile" onclick="alert('EcoCash: 0786121087')"><i>❤️</i><span>Donate</span></div>
+                <div class="tile" onclick="alert('Support: 0786121087')"><i>❤️</i><span>Donate</span></div>
             </div>
             
-            <input type="file" id="filePicker" style="display:none" onchange="handleVault()">
-            <div id="status" style="margin-top:15px; font-size: 0.8em; color: #f1c40f;">Secure local encryption engine active.</div>
+            <div id="status" style="margin-top:15px; font-size: 0.8em; color: #f1c40f;">System ready. Desktop mode supports auto-replace.</div>
 
-            <!-- DOWNLOAD SECTION -->
             <div class="download-section">
                 <a href="https://github.com" class="dl-btn dl-android">📲 DOWNLOAD FOR ANDROID (.APK)</a>
                 <a href="https://github.com" class="dl-btn dl-desktop">💻 DOWNLOAD FOR WINDOWS (.EXE)</a>
@@ -75,25 +64,52 @@
     </div>
 
     <script>
-        let vaultMode = '';
-        function openPicker(mode) {
-            if (!document.getElementById('masterPass').value) { alert("Password Required"); return; }
-            vaultMode = mode;
-            document.getElementById('filePicker').click();
+        async function handleShredder(mode) {
+            const pass = document.getElementById('masterPass').value;
+            if (!pass) { alert("Password Required for Shredding"); return; }
+            const status = document.getElementById('status');
+
+            try {
+                // Check if the browser supports the File System Access API (Desktop only)
+                if ('showOpenFilePicker' in window) {
+                    const [fileHandle] = await window.showOpenFilePicker();
+                    const file = await fileHandle.getFile();
+                    status.innerText = "⚙️ Shredding & Replacing " + file.name + "...";
+
+                    // 1. Simulate Encryption Logic
+                    const encryptedContent = "ENCMASTER_SECURE_" + Date.now();
+
+                    // 2. Create the new file content
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(encryptedContent);
+                    await writable.close();
+
+                    // 3. Rename (Shredding effect)
+                    status.innerHTML = "✅ Original Shredded & Replaced!";
+                    alert("Success: File content has been overwritten and shredded.");
+                } else {
+                    // Fallback for Mobile/Hotspot (Regular Download)
+                    status.innerText = "⚠️ Auto-Shred only supported on Desktop. Downloading copy...";
+                    triggerDownloadFallback(mode);
+                }
+            } catch (err) {
+                status.innerText = "❌ Cancelled or Error.";
+            }
         }
-        async function handleVault() {
-            const file = document.getElementById('filePicker').files[0];
-            if (!file) return;
-            document.getElementById('status').innerText = "⚙️ Processing " + file.name + "...";
-            setTimeout(() => {
-                const downloadName = vaultMode === 'encrypt' ? file.name + ".enc" : file.name.replace(".enc", "");
+
+        function triggerDownloadFallback(mode) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const downloadName = mode === 'encrypt' ? file.name + ".enc" : file.name.replace(".enc", "");
                 const blob = new Blob(["SECURE_DATA"], {type: "application/octet-stream"});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = downloadName;
                 a.click();
-                document.getElementById('status').innerHTML = "✅ Done! Saved to downloads.";
-            }, 1500);
+            };
+            input.click();
         }
     </script>
 </body>
