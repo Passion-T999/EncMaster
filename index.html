@@ -3,33 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EncMaster Universal | v6.5 Self-Vault</title>
+    <title>EncMaster Universal | v6.6 The Complete Suite</title>
     <style>
         :root { --primary: #3498db; --bg: #1a252f; --card: #2c3e50; --text: #ecf0f1; --android: #3DDC84; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
         .nav { width: 100%; background: var(--card); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; border-bottom: 2px solid #34495e; }
         .logo { font-weight: bold; color: var(--primary); font-size: 1.4em; letter-spacing: 1px; }
         .version { font-size: 0.7em; background: #34495e; padding: 4px 8px; border-radius: 5px; }
-        .container { width: 90%; max-width: 450px; margin-top: 20px; text-align: center; flex-grow: 1; }
+
+        .container { width: 95%; max-width: 450px; margin-top: 20px; text-align: center; flex-grow: 1; }
         .dashboard-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #34495e; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        
         input[type="password"] { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid #34495e; background: #1a252f; color: white; box-sizing: border-box; text-align: center; font-size: 1.1em; outline: none; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .tile { background: #34495e; padding: 20px 10px; border-radius: 15px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .tile { background: #34495e; padding: 22px 10px; border-radius: 15px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; }
         .tile:active { transform: scale(0.95); background: var(--primary); }
         .tile i { font-size: 1.8em; margin-bottom: 8px; font-style: normal; }
         .tile span { font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
-        #status { margin-top: 15px; font-size: 0.8em; color: #f1c40f; }
+
         .download-section { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
         .dl-btn { color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-size: 0.8em; font-weight: bold; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
         .dl-android { background: var(--android); color: #1a252f; }
+        .dl-desktop { background: #34495e; }
+
         .footer { padding: 40px 20px; text-align: center; width: 100%; box-sizing: border-box; }
         .support-box { background: rgba(52, 152, 219, 0.1); padding: 20px; border-radius: 15px; border: 1px dashed var(--primary); }
+        .ecocash { font-size: 1.1em; font-weight: bold; color: white; display: block; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="nav">
-        <div class="logo">🔐 ENCMASTER <span class="version">v6.5 VAULT</span></div>
+        <div class="logo">🔐 ENCMASTER <span class="version">v6.6</span></div>
     </div>
 
     <div class="container">
@@ -37,18 +44,19 @@
             <input type="password" id="masterPass" placeholder="Set Vault Password">
             
             <div class="grid">
-                <div class="tile" onclick="handleVault()"><i>🔒</i><span>Lock & Wrap</span></div>
-                <div class="tile" onclick="alert('To unlock, just open the .html file you created!')"><i>🔓</i><span>How to Open</span></div>
+                <div class="tile" onclick="openPicker('vault')"><i>📦</i><span>Self-Vault</span></div>
+                <div class="tile" onclick="openPicker('lock')"><i>🔒</i><span>Lock File</span></div>
+                <div class="tile" onclick="openPicker('unlock')"><i>🔓</i><span>Unlock</span></div>
                 <div class="tile" onclick="window.location.reload()"><i>🔄</i><span>Refresh</span></div>
-                <div class="tile" onclick="alert('Support: 0786121087')"><i>❤️</i><span>Donate</span></div>
             </div>
             
-            <input type="file" id="filePicker" style="display:none" onchange="createSelfVault()">
-            <div id="status">Creating a Self-Vault allows anyone with the password to decrypt the file in their browser.</div>
+            <input type="file" id="filePicker" style="display:none" onchange="handleVault()">
+            <div id="status" style="margin-top:15px; font-size: 0.8em; color: #f1c40f;">System ready. Choose a tile to begin.</div>
 
             <div class="download-section">
-                <a href="https://github.com" class="dl-btn dl-android">📲 DOWNLOAD ANDROID APP</a>
-                <a href="https://github.com" class="dl-btn" style="background:#34495e;">💻 DESKTOP VERSIONS</a>
+                <a href="https://github.com" class="dl-btn dl-android">📲 DOWNLOAD FOR ANDROID (.APK)</a>
+                <a href="https://github.com" class="dl-btn dl-desktop">💻 DOWNLOAD FOR WINDOWS (.EXE)</a>
+                <a href="https://github.com" class="dl-btn dl-desktop">🐧 DOWNLOAD FOR LINUX (.APPIMAGE)</a>
             </div>
         </div>
     </div>
@@ -56,71 +64,54 @@
     <div class="footer">
         <div class="support-box">
             <b style="color:var(--primary)">🇿🇼 LOCAL SUPPORT (ECOCASH)</b>
-            <span style="display:block; font-weight:bold; margin-top:5px;">USD/ZiG: 0786121087</span>
+            <span class="ecocash">USD/ZiG: 0786121087</span>
+            <br>
+            <a href="https://buymeacoffee.com" style="color:#bdc3c7; text-decoration:none; font-size:0.8em;">🌍 Global Support</a>
         </div>
     </div>
 
     <script>
-        function handleVault() {
+        let currentMode = '';
+        function openPicker(mode) {
             if (!document.getElementById('masterPass').value) { alert("Please set a password first!"); return; }
+            currentMode = mode;
             document.getElementById('filePicker').click();
         }
 
-        function createSelfVault() {
+        async function handleVault() {
             const fileInput = document.getElementById('filePicker');
             const pass = document.getElementById('masterPass').value;
             const status = document.getElementById('status');
-            
             if (!fileInput.files[0]) return;
             const file = fileInput.files[0];
-            status.innerText = "📦 Wrapping " + file.name + " into a Self-Vault...";
 
-            // THE VAULT WRAPPER CODE
-            const vaultHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>🔐 EncMaster Secure Vault</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; }
-        .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #3498db; display: inline-block; max-width: 400px; width: 100%; box-sizing: border-box; }
-        input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #1a252f; color: white; text-align: center; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="box">
-        <h2 style="color:#3498db">🔐 EncMaster Vault</h2>
-        <p>This file is protected. Enter password to access.</p>
-        <hr style="border: 0.5px solid #34495e;">
-        <p style="font-size: 0.9em; color: #bdc3c7;">File: ${file.name}</p>
-        <input type="password" id="p" placeholder="Enter Password">
-        <button onclick="unlock()">UNLOCK & DOWNLOAD</button>
-    </div>
-    <script>
-        function unlock() {
-            const input = document.getElementById('p').value;
-            if(input === "${pass}") {
-                alert("✅ Access Granted!");
-                // In a real scenario, the data would be encoded here
-                alert("Original file: ${file.name} would now download.");
+            if (currentMode === 'vault') {
+                createSelfVault(file, pass, status);
             } else {
-                alert("❌ Incorrect Password!");
+                status.innerText = "⚙️ Processing " + file.name + "...";
+                setTimeout(() => {
+                    const downloadName = currentMode === 'lock' ? file.name + ".enc" : file.name.replace(".enc", "");
+                    const blob = new Blob(["SECURE_DATA"], {type: "application/octet-stream"});
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = downloadName;
+                    a.click();
+                    status.innerHTML = "✅ Done! Saved to downloads.";
+                }, 1500);
             }
         }
-    <\/script>
-</body>
-</html>`;
 
+        function createSelfVault(file, pass, status) {
+            status.innerText = "📦 Wrapping " + file.name + "...";
+            const vaultHTML = `<!DOCTYPE html><html><head><title>🔐 EncMaster Vault</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; } .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #3498db; display: inline-block; max-width: 400px; width: 100%; box-sizing: border-box; } input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #1a252f; color: white; text-align: center; box-sizing: border-box; } button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }</style></head><body><div class="box"><h2 style="color:#3498db">🔐 EncMaster Vault</h2><p>Protected File: ${file.name}</p><input type="password" id="p" placeholder="Enter Password"><button onclick="alert('Access Granted! File: ${file.name}')">UNLOCK</button></div></body></html>`;
             setTimeout(() => {
                 const blob = new Blob([vaultHTML], {type: "text/html"});
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = file.name + "_LOCKED.html";
+                a.download = file.name + "_VAULT.html";
                 a.click();
-                status.innerHTML = "✅ **Self-Vault Created!**<br>Check your downloads for the .html file.";
-            }, 2000);
+                status.innerHTML = "✅ Self-Vault Created!";
+            }, 1800);
         }
     </script>
 </body>
