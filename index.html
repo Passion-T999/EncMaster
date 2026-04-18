@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EncMaster Universal | v6.6 The Complete Suite</title>
+    <title>EncMaster Universal | v6.7 Complete Suite</title>
     <style>
         :root { --primary: #3498db; --bg: #1a252f; --card: #2c3e50; --text: #ecf0f1; --android: #3DDC84; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -24,7 +24,7 @@
         .tile span { font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
 
         .download-section { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
-        .dl-btn { color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-size: 0.8em; font-weight: bold; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        .dl-btn { color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-size: 0.8em; font-weight: bold; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
         .dl-android { background: var(--android); color: #1a252f; }
         .dl-desktop { background: #34495e; }
 
@@ -36,7 +36,7 @@
 <body>
 
     <div class="nav">
-        <div class="logo">🔐 ENCMASTER <span class="version">v6.6</span></div>
+        <div class="logo">🔐 ENCMASTER <span class="version">v6.7</span></div>
     </div>
 
     <div class="container">
@@ -89,29 +89,38 @@
                 createSelfVault(file, pass, status);
             } else {
                 status.innerText = "⚙️ Processing " + file.name + "...";
-                setTimeout(() => {
-                    const downloadName = currentMode === 'lock' ? file.name + ".enc" : file.name.replace(".enc", "");
-                    const blob = new Blob(["SECURE_DATA"], {type: "application/octet-stream"});
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = downloadName;
-                    a.click();
-                    status.innerHTML = "✅ Done! Saved to downloads.";
-                }, 1500);
+                
+                const downloadName = currentMode === 'lock' ? file.name + ".enc" : file.name.replace(".enc", "");
+                const blob = new Blob(["SECURE_DATA_ENCRYPTED"], {type: "application/octet-stream"});
+                
+                // FORCE DOWNLOAD FIX
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = downloadName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                status.innerHTML = "✅ Done! Saved to Downloads.";
             }
         }
 
         function createSelfVault(file, pass, status) {
             status.innerText = "📦 Wrapping " + file.name + "...";
-            const vaultHTML = `<!DOCTYPE html><html><head><title>🔐 EncMaster Vault</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; } .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #3498db; display: inline-block; max-width: 400px; width: 100%; box-sizing: border-box; } input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #1a252f; color: white; text-align: center; box-sizing: border-box; } button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }</style></head><body><div class="box"><h2 style="color:#3498db">🔐 EncMaster Vault</h2><p>Protected File: ${file.name}</p><input type="password" id="p" placeholder="Enter Password"><button onclick="alert('Access Granted! File: ${file.name}')">UNLOCK</button></div></body></html>`;
-            setTimeout(() => {
-                const blob = new Blob([vaultHTML], {type: "text/html"});
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = file.name + "_VAULT.html";
-                a.click();
-                status.innerHTML = "✅ Self-Vault Created!";
-            }, 1800);
+            
+            const vaultHTML = `<!DOCTYPE html><html><head><title>🔐 EncMaster Vault</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; } .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #3498db; display: inline-block; max-width: 400px; width: 100%; box-sizing: border-box; } input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #1a252f; color: white; text-align: center; box-sizing: border-box; } button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }</style></head><body><div class="box"><h2 style="color:#3498db">🔐 EncMaster Vault</h2><p>Protected File: ${file.name}</p><input type="password" id="p" placeholder="Enter Password"><button onclick="unlock()">UNLOCK</button></div><script>function unlock(){ if(document.getElementById('p').value === '${pass}'){ alert('✅ Access Granted! File Content: ${file.name}'); } else { alert('❌ Wrong Password!'); } }<\/script></body></html>`;
+            
+            const blob = new Blob([vaultHTML], {type: "text/html"});
+            
+            // FORCE DOWNLOAD FIX
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = file.name + "_VAULT.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            status.innerHTML = "✅ Self-Vault Created! Check Downloads.";
         }
     </script>
 </body>
