@@ -17,7 +17,6 @@
         .tile i { font-size: 2em; display: block; margin-bottom: 10px; font-style: normal; }
         .tile span { font-size: 0.8em; font-weight: bold; }
         #status { margin-top: 25px; font-size: 0.9em; color: #f1c40f; min-height: 40px; }
-        .footer { margin-top: 50px; padding: 20px; border: 1px dashed var(--primary); border-radius: 10px; width: 80%; }
     </style>
 </head>
 <body>
@@ -29,85 +28,98 @@
     <div class="container">
         <div class="card">
             <input type="password" id="p" placeholder="Set Vault Password">
-            
             <div class="grid">
-                <div class="tile" onclick="openPicker()">
+                <div class="tile" onclick="document.getElementById('f').click()">
                     <i>📦</i><span>CREATE VAULT</span>
                 </div>
                 <div class="tile" onclick="window.location.reload()">
                     <i>🔄</i><span>REFRESH</span>
                 </div>
-                <div class="tile" onclick="alert('EcoCash: 0786121087')"><i>❤️</i><span>SUPPORT</span>
-                </div>
-                <div class="tile" onclick="alert('To unlock, just open the .html file you created!')">
-                    <i>🔓</i><span>HELP</span>
-                </div>
             </div>
-            
             <input type="file" id="f" style="display:none" onchange="wrapFile()">
-            <div id="status">Lock any file into a standalone HTML Vault you can send to anyone.</div>
+            <div id="status">Files will auto-play or display immediately upon decryption.</div>
         </div>
     </div>
 
-    <div class="footer">
-        <b>🇿🇼 LOCAL SUPPORT: 0786121087</b>
-    </div>
-
     <script>
-        function openPicker() {
-            if(!document.getElementById('p').value) { alert("Please set a password first!"); return; }
-            document.getElementById('f').click();
-        }
-
         function wrapFile() {
-            const file = document.getElementById('f').files[0];
+            const fileInput = document.getElementById('f');
+            const file = fileInput.files[0];
             const pass = document.getElementById('p').value;
             const status = document.getElementById('status');
-            if(!file) return;
 
-            status.innerText = "📦 Wrapping " + file.name + "...";
+            if (!pass) { alert("Please set a password first!"); return; }
+            status.innerText = "⚙️ Encoding " + file.name + "...";
 
-            // THE STANDALONE UNLOCKER HTML
-            const vaultHTML = `
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                const fileType = file.type;
+
+                const vaultHTML = `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🔐 EncMaster Secure File</title>
+    <title>🔐 Locked: ${file.name}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; }
-        .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #3498db; display: inline-block; max-width: 400px; width: 100%; }
+        .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #3498db; display: inline-block; max-width: 500px; width: 100%; }
         input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #1a252f; color: white; text-align: center; box-sizing: border-box; }
         button { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        #viewer { margin-top: 20px; width: 100%; }
+        img, video { max-width: 100%; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div class="box">
+    <div id="login-screen" class="box">
         <h2 style="color:#3498db">🔐 EncMaster Vault</h2>
-        <p>File: ${file.name}</p>
-        <hr style="border:0.5px solid #34495e;">
+        <p>Protected Content: <b>${file.name}</b></p>
         <input type="password" id="pass" placeholder="Enter Password">
-        <button onclick="unlock()">UNLOCK FILE</button>
+        <button onclick="unlock()">UNLOCK & VIEW</button>
+    </div>
+    <div id="content-screen" style="display:none;">
+        <h2 style="color:#2ecc71">✅ Access Granted</h2>
+        <div id="viewer"></div>
+        <br>
+        <button onclick="window.location.reload()" style="background:#e74c3c; padding:10px 20px; color:white; border:none; border-radius:5px; cursor:pointer;">LOCK AGAIN</button>
     </div>
     <script>
         function unlock() {
             if(document.getElementById('pass').value === '${pass}') {
-                alert('✅ Access Granted! Content of ${file.name} is now secure.');
-                document.body.innerHTML = '<h1 style="color:#2ecc71">Access Granted</h1><p>The file <b>${file.name}</b> has been unlocked successfully.</p>';
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('content-screen').style.display = 'block';
+                const viewer = document.getElementById('viewer');
+                const data = "${base64Data}";
+                const type = "${fileType}";
+
+                if (type.startsWith('image/')) {
+                    viewer.innerHTML = '<img src="' + data + '">';
+                } else if (type.startsWith('video/')) {
+                    viewer.innerHTML = '<video controls autoplay src="' + data + '"></video>';
+                } else if (type.startsWith('audio/')) {
+                    viewer.innerHTML = '<audio controls autoplay src="' + data + '"></audio>';
+                } else if (type === 'application/pdf') {
+                    viewer.innerHTML = '<iframe src="' + data + '" width="100%" height="500px"></iframe>';
+                } else {
+                    viewer.innerHTML = '<p>This file type is not supported for direct preview, but you can download it.</p><a href="' + data + '" download="${file.name}" style="color:#3498db; text-decoration:none; font-weight:bold;">DOWNLOAD FILE</a>';
+                }
             } else { alert('❌ Wrong Password!'); }
         }
     <\/script>
 </body>
 </html>`;
 
-            const blob = new Blob([vaultHTML], {type: "text/html"});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = file.name + "_VAULT.html";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            status.innerHTML = "✅ **Vault Created!**<br>Send the .html file to the receiver.";
+                const blob = new Blob([vaultHTML], {type: "text/html"});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = file.name + "_VAULT.html";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                status.innerHTML = "✅ **Vault Created!**<br>The file is now hidden inside the HTML.";
+            };
+            reader.readAsDataURL(file);
         }
     </script>
 </body>
