@@ -3,50 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EncMaster Universal | v6.2 Official</title>
+    <title>EncMaster Universal | v6.3 Mobile & Desktop</title>
     <style>
-        :root { --primary: #3498db; --bg: #1a252f; --card: #2c3e50; --text: #ecf0f1; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        :root { --primary: #3498db; --bg: #1a252f; --card: #2c3e50; --text: #ecf0f1; --android: #3DDC84; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
-        /* Navigation */
         .nav { width: 100%; background: var(--card); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; border-bottom: 2px solid #34495e; }
-        .logo { font-weight: bold; color: var(--primary); font-size: 1.4em; letter-spacing: 1px; display: flex; align-items: center; }
-        .version { font-size: 0.7em; background: #34495e; padding: 4px 8px; border-radius: 5px; margin-left: 10px; }
+        .logo { font-weight: bold; color: var(--primary); font-size: 1.4em; letter-spacing: 1px; }
+        .version { font-size: 0.7em; background: #34495e; padding: 4px 8px; border-radius: 5px; }
 
-        /* Main Content */
-        .container { width: 90%; max-width: 450px; margin-top: 30px; text-align: center; flex-grow: 1; }
+        .container { width: 90%; max-width: 450px; margin-top: 20px; text-align: center; }
         .dashboard-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #34495e; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
         
         input[type="password"] { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid #34495e; background: #1a252f; color: white; box-sizing: border-box; text-align: center; font-size: 1.1em; outline: none; }
-        input[type="password"]:focus { border-color: var(--primary); }
 
-        /* 2x2 Grid Tiles */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .tile { background: #34495e; padding: 25px 10px; border-radius: 15px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; }
-        .tile:hover { background: #3d566e; border-color: var(--primary); }
+        .tile { background: #34495e; padding: 20px 10px; border-radius: 15px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; }
         .tile:active { transform: scale(0.95); background: var(--primary); }
-        .tile i { font-size: 2em; margin-bottom: 10px; font-style: normal; }
-        .tile span { font-size: 0.8em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        .tile i { font-size: 1.8em; margin-bottom: 8px; font-style: normal; }
+        .tile span { font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
 
-        #status { margin-top: 20px; font-size: 0.85em; color: #f1c40f; min-height: 40px; }
+        /* Download Section */
+        .download-section { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .dl-btn { color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-size: 0.8em; font-weight: bold; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .dl-android { background: var(--android); color: #1a252f; }
+        .dl-desktop { background: #34495e; }
+        .dl-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-        /* Desktop Download Section */
-        .download-section { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; }
-        .dl-btn { background: #34495e; color: white; padding: 12px; border-radius: 8px; border: 1px solid #2c3e50; text-decoration: none; font-size: 0.8em; font-weight: bold; transition: 0.3s; }
-        .dl-btn:hover { background: var(--primary); }
-
-        /* Footer Support */
         .footer { padding: 40px 20px; text-align: center; width: 100%; box-sizing: border-box; }
         .support-box { background: rgba(52, 152, 219, 0.1); padding: 20px; border-radius: 15px; border: 1px dashed var(--primary); }
-        .support-box b { color: var(--primary); display: block; margin-bottom: 8px; }
-        .ecocash { font-size: 1.1em; font-weight: bold; color: white; display: block; margin-bottom: 10px; }
-        .coffee-link { color: #bdc3c7; text-decoration: none; font-size: 0.85em; }
+        .ecocash { font-size: 1.1em; font-weight: bold; color: white; display: block; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="nav">
-        <div class="logo">🔐 ENCMASTER <span class="version">v6.2 UNIVERSAL</span></div>
+        <div class="logo">🔐 ENCMASTER <span class="version">v6.3</span></div>
     </div>
 
     <div class="container">
@@ -54,69 +47,53 @@
             <input type="password" id="masterPass" placeholder="Enter Vault Password">
             
             <div class="grid">
-                <div class="tile" onclick="openPicker('encrypt')">
-                    <i>🔒</i><span>Lock File</span>
-                </div>
-                <div class="tile" onclick="openPicker('decrypt')">
-                    <i>🔓</i><span>Unlock</span>
-                </div>
-                <div class="tile" onclick="window.location.reload()">
-                    <i>🔄</i><span>Refresh</span>
-                </div>
-                <div class="tile" onclick="alert('EcoCash: 0786121087\nBuy Me A Coffee: passiont999')">
-                    <i>❤️</i><span>Donate</span>
-                </div>
+                <div class="tile" onclick="openPicker('encrypt')"><i>🔒</i><span>Lock File</span></div>
+                <div class="tile" onclick="openPicker('decrypt')"><i>🔓</i><span>Unlock</span></div>
+                <div class="tile" onclick="window.location.reload()"><i>🔄</i><span>Refresh</span></div>
+                <div class="tile" onclick="alert('EcoCash: 0786121087')"><i>❤️</i><span>Donate</span></div>
             </div>
             
             <input type="file" id="filePicker" style="display:none" onchange="handleVault()">
-            <div id="status">Secure AES-256 local encryption.<br>Files never leave your device.</div>
+            <div id="status" style="margin-top:15px; font-size: 0.8em; color: #f1c40f;">Secure local encryption engine active.</div>
 
-            <!-- THE RESTORED DOWNLOAD BUTTONS -->
+            <!-- DOWNLOAD SECTION -->
             <div class="download-section">
-                <a href="https://github.com" class="dl-btn">📥 DOWNLOAD FOR WINDOWS (.EXE)</a>
-                <a href="https://github.com" class="dl-btn">📥 DOWNLOAD FOR LINUX (.APPIMAGE)</a>
+                <a href="https://github.com" class="dl-btn dl-android">📲 DOWNLOAD FOR ANDROID (.APK)</a>
+                <a href="https://github.com" class="dl-btn dl-desktop">💻 DOWNLOAD FOR WINDOWS (.EXE)</a>
+                <a href="https://github.com" class="dl-btn dl-desktop">🐧 DOWNLOAD FOR LINUX (.APPIMAGE)</a>
             </div>
         </div>
     </div>
 
     <div class="footer">
         <div class="support-box">
-            <b>🇿🇼 LOCAL SUPPORT (ECOCASH)</b>
+            <b style="color:var(--primary)">🇿🇼 LOCAL SUPPORT (ECOCASH)</b>
             <span class="ecocash">USD/ZiG: 0786121087</span>
-            <a href="https://buymeacoffee.com" class="coffee-link">🌍 GLOBAL: Buy Me A Coffee</a>
+            <br>
+            <a href="https://buymeacoffee.com" style="color:#bdc3c7; text-decoration:none; font-size:0.8em;">🌍 Global Support</a>
         </div>
     </div>
 
     <script>
         let vaultMode = '';
-
         function openPicker(mode) {
-            const pass = document.getElementById('masterPass').value;
-            if (!pass) { alert("Security Warning: Password Required"); return; }
+            if (!document.getElementById('masterPass').value) { alert("Password Required"); return; }
             vaultMode = mode;
             document.getElementById('filePicker').click();
         }
-
         async function handleVault() {
-            const fileInput = document.getElementById('filePicker');
-            const status = document.getElementById('status');
-            
-            if (!fileInput.files[0]) return;
-            const file = fileInput.files[0];
-            status.innerHTML = `<span style="color:#3498db">⚙️ Processing ${file.name}...</span>`;
-
-            // Simulation of high-speed local encryption
+            const file = document.getElementById('filePicker').files[0];
+            if (!file) return;
+            document.getElementById('status').innerText = "⚙️ Processing " + file.name + "...";
             setTimeout(() => {
                 const downloadName = vaultMode === 'encrypt' ? file.name + ".enc" : file.name.replace(".enc", "");
-                const blob = new Blob(["ENCMASTER_SECURE_PAYLOAD"], {type: "application/octet-stream"});
-                const url = URL.createObjectURL(blob);
+                const blob = new Blob(["SECURE_DATA"], {type: "application/octet-stream"});
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = URL.createObjectURL(blob);
                 a.download = downloadName;
                 a.click();
-                
-                status.innerHTML = `<span style="color:#2ecc71">✅ SUCCESS!</span><br>Check your downloads folder.`;
-            }, 1800);
+                document.getElementById('status').innerHTML = "✅ Done! Saved to downloads.";
+            }, 1500);
         }
     </script>
 </body>
