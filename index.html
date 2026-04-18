@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EncMaster v7.4 | Smart Share</title>
+    <title>EncMaster v7.5 | Passion T Raphael</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #1a252f; color: white; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #1a252f; color: white; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; min-height: 100vh; }
         .card { background: #2c3e50; padding: 30px; border-radius: 20px; border: 1px solid #3498db; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; }
         
         input, textarea { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; background: #1a252f; color: white; text-align: center; box-sizing: border-box; }
@@ -17,22 +17,24 @@
         .btn-gray { background: #34495e; color: #bdc3c7; }
         .list-btn:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* Updated Share Hub Design */
         #share-hub { display: none; margin-top: 20px; background: #1a252f; border-radius: 15px; padding: 15px; text-align: left; border: 1px solid #34495e; }
         .hub-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #34495e; }
         .hub-item:last-child { border: none; }
         .icon-group { display: flex; gap: 15px; }
         .action-icon { cursor: pointer; font-size: 1.2em; transition: 0.2s; }
-        .action-icon:hover { transform: scale(1.2); }
 
         #status { margin-top: 20px; color: #f1c40f; font-size: 0.85em; }
-        .footer { margin-top: 30px; font-size: 0.8em; border-top: 1px solid #34495e; padding-top: 20px; width: 100%; }
+        
+        /* THE NEW SIGNATURE FOOTER */
+        .footer { margin-top: 30px; font-size: 0.8em; border-top: 1px solid #34495e; padding-top: 20px; width: 100%; text-align: center; }
+        .developer-tag { margin-top: 20px; font-size: 0.75em; color: #7f8c8d; letter-spacing: 1px; }
+        .developer-name { color: #3498db; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2 style="color:#3498db; margin-bottom: 20px;">🔐 EncMaster v7.4</h2>
+        <h2 style="color:#3498db; margin-bottom: 20px;">🔐 EncMaster v7.5</h2>
         
         <input type="password" id="p" placeholder="Set Master Password">
         
@@ -51,7 +53,6 @@
             🌐 OPEN SHARE HUB
         </button>
 
-        <!-- THE SMART HUB -->
         <div id="share-hub">
             <h4 style="margin:0 0 10px 0; color:#9b59b6; display: flex; justify-content: space-between;">
                 Vault Manager 📂 <span style="font-size: 0.7em; color: #7f8c8d; cursor: pointer;" onclick="clearHub()">Clear All</span>
@@ -66,11 +67,14 @@
         </button>
 
         <input type="file" id="f" style="display:none" onchange="generateVault()">
-        <div id="status">Ready for secure operations.</div>
+        <div id="status">System ready.</div>
 
         <div class="footer">
             <b style="color:#3498db">🇿🇼 SUPPORT (ECOCASH)</b><br>
             USD/ZiG: 0786121087
+            <div class="developer-tag">
+                Developed by <span class="developer-name">Passion T Raphael</span>
+            </div>
         </div>
     </div>
 
@@ -93,8 +97,8 @@
                 <div class="hub-item">
                     <span style="font-size: 0.8em; overflow: hidden;">📄 ${v.name.substring(0, 12)}...</span>
                     <div class="icon-group">
-                        <span class="action-icon" title="Share/Download" onclick="smartShare(${i})">📤</span>
-                        <span class="action-icon" title="Delete" onclick="deleteItem(${i})" style="filter: grayscale(1);">🗑️</span>
+                        <span class="action-icon" onclick="smartShare(${i})">📤</span>
+                        <span class="action-icon" onclick="deleteItem(${i})" style="filter: grayscale(1);">🗑️</span>
                     </div>
                 </div>
             `).join('');
@@ -102,43 +106,29 @@
 
         async function smartShare(i) {
             const v = recentVaults[i];
-            
-            // 1. Try Mobile Sharing First
             if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
                 try {
                     const file = new File([v.blob], v.name, { type: "text/html" });
                     await navigator.share({ files: [file], title: 'EncMaster Vault' });
                     return; 
-                } catch (err) { console.log("Mobile share cancelled"); }
+                } catch (err) { console.log("Mobile share failed"); }
             }
-
-            // 2. Desktop Fallback: Re-Download the file
             const a = document.createElement('a');
             a.href = URL.createObjectURL(v.blob);
             a.download = v.name;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            alert("Vault re-downloaded! You can now drag this file into your Email or Chat.");
+            alert("Vault re-downloaded successfully!");
         }
 
-        function deleteItem(i) {
-            recentVaults.splice(i, 1);
-            renderHub();
-        }
+        function deleteItem(i) { recentVaults.splice(i, 1); renderHub(); }
+        function clearHub() { recentVaults = []; renderHub(); }
 
-        function clearHub() {
-            recentVaults = [];
-            renderHub();
-        }
-
-        // --- VAULT GENERATION ---
         function generateVault() {
-            const fileInput = document.getElementById('f');
-            const file = fileInput.files[0];
+            const file = document.getElementById('f').files[0];
             const pass = document.getElementById('p').value;
             if (!pass) { alert("Set password!"); return; }
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const vault = createHTMLVault(file.name, e.target.result, file.type, pass);
@@ -151,7 +141,6 @@
             const note = document.getElementById('note').value;
             const pass = document.getElementById('p').value;
             if (!pass || !note) { alert("Input required!"); return; }
-
             const data = "data:text/plain;base64," + btoa(note);
             const vault = createHTMLVault("Note", data, "text/plain", pass);
             processVault("Note_VAULT.html", vault);
@@ -160,19 +149,16 @@
         function processVault(name, content) {
             const blob = new Blob([content], {type: "text/html"});
             recentVaults.push({ name, blob });
-            
-            // Initial Download
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = name;
             a.click();
-            
             document.getElementById('status').innerText = "✅ Vault Created: " + name;
             renderHub();
         }
 
         function createHTMLVault(name, data, type, pass) {
-            return `<!DOCTYPE html><html><head><title>🔐 Vault</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;background:#1a252f;color:white;text-align:center;padding:50px 20px;}.box{background:#2c3e50;padding:30px;border-radius:20px;border:2px solid #2ecc71;display:inline-block;width:100%;max-width:500px;}input{width:80%;padding:15px;margin:20px;border-radius:10px;border:none;text-align:center;background:#1a252f;color:white;}button{padding:15px 30px;background:#2ecc71;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;}</style></head><body><div id="lock"><div class="box"><h2>🔐 EncMaster Vault</h2><p>File: ${name}</p><input type="password" id="pass" placeholder="Enter Password"><br><button onclick="unlock()">UNLOCK</button></div></div><div id="view" style="display:none"><h2 style="color:#2ecc71">✅ Access Granted</h2><div id="media"></div></div><script>function unlock(){if(document.getElementById('pass').value==='${pass}'){document.getElementById('lock').style.display='none';document.getElementById('view').style.display='block';const m=document.getElementById('media');const d="${data}";const t="${type}";if(t.includes('audio'))m.innerHTML='<audio controls autoplay style="width:100%"><source src="'+d+'"></audio>';else if(t.includes('video'))m.innerHTML='<video controls autoplay style="width:100%"><source src="'+d+'"></video>';else if(t.includes('image'))m.innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:10px;">';else if(t.includes('text'))m.innerHTML='<div style="background:#1a252f;padding:20px;border-radius:10px;text-align:left;white-space:pre-wrap;">'+atob(d.split(',')[1])+'</div>';else m.innerHTML='<p>Preview unavailable.</p><a href="'+d+'" download="${name}" style="color:#2ecc71">Download Original</a>';}else{alert('Wrong Password!');}}<\/script></body></html>`;
+            return `<!DOCTYPE html><html><head><title>🔐 Vault</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;background:#1a252f;color:white;text-align:center;padding:50px 20px;}.box{background:#2c3e50;padding:30px;border-radius:20px;border:2px solid #2ecc71;display:inline-block;width:100%;max-width:500px;}input{width:80%;padding:15px;margin:20px;border-radius:10px;border:none;text-align:center;background:#1a252f;color:white;}button{padding:15px 30px;background:#2ecc71;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;}</style></head><body><div id="lock"><div class="box"><h2>🔐 EncMaster Vault</h2><p>File: ${name}</p><input type="password" id="pass" placeholder="Enter Password"><br><button onclick="unlock()">UNLOCK</button></div></div><div id="view" style="display:none"><h2 style="color:#2ecc71">✅ Access Granted</h2><div id="media"></div></div><script>function unlock(){if(document.getElementById('pass').value==='${pass}'){document.getElementById('lock').style.display='none';document.getElementById('view').style.display='block';const m=document.getElementById('media');const d="${data}";const t="${type}";if(t.includes('audio'))m.innerHTML='<audio controls autoplay style="width:100%"><source src="'+d+'"></audio>';else if(t.includes('video'))m.innerHTML='<video controls autoplay style="width:100%"><source src="'+d+'"></video>';else if(t.includes('image'))m.innerHTML='<img src="'+d+'" style="max-width:100%;border-radius:10px;">';else if(t.includes('text'))m.innerHTML='<div style="background:#1a252f;padding:20px;border-radius:10px;text-align:left;white-space:pre-wrap;">'+atob(d.split(','))+'</div>';else m.innerHTML='<p>Preview unavailable.</p><a href="'+d+'" download="${name}" style="color:#2ecc71">Download Original</a>';}else{alert('Wrong Password!');}}<\/script></body></html>`;
         }
     </script>
 </body>
