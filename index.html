@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EncMaster v7.5 | Passion T Raphael</title>
+    <title>EncMaster v7.6 | Passion T Raphael</title>
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -63,6 +63,8 @@
             padding: 15px; 
             text-align: left; 
             border: 1px solid #34495e; 
+            max-height: 300px; 
+            overflow-y: auto; 
         }
         .hub-item { 
             display: flex; 
@@ -96,7 +98,7 @@
 <body>
 
     <div class="card">
-        <h2 style="color:#3498db; margin-bottom: 20px;">🔐 EncMaster v7.5</h2>
+        <h2 style="color:#3498db; margin-bottom: 20px;">🔐 EncMaster v7.6</h2>
         
         <input type="password" id="p" placeholder="Set Master Password">
         
@@ -118,8 +120,8 @@
 
         <div id="share-hub">
             <h4 style="margin:0 0 10px 0; color:#9b59b6; display: flex; justify-content: space-between;">
-                Vault Manager 📂 
-                <span style="font-size: 0.7em; color: #7f8c8d; cursor: pointer;" onclick="clearHub()">Clear All</span>
+                Permanent Vaults 📂 
+                <span style="font-size: 0.7em; color: #e74c3c; cursor: pointer;" onclick="clearPermanentHub()">Wipe All</span>
             </h4>
             <div id="hub-list"></div>
         </div>
@@ -132,8 +134,7 @@
         <div id="status">System ready.</div>
 
         <div class="footer">
-            <b style="color:#3498db">🇿🇼 SUPPORT (ECOCASH)</b><br>
-            USD/ZiG: 0786121087
+            <b style="color:#3498db">Support (EcoCash): 0786121087</b>
             <div class="dev-tag">
                 Developed by <span class="dev-name">Passion T Raphael</span>
             </div>
@@ -141,7 +142,8 @@
     </div>
 
     <script>
-        let recentVaults = [];
+        // Load history from the browser's memory
+        let vaultHistory = JSON.parse(localStorage.getItem('encmaster_history')) || [];
 
         function toggleHub() {
             const hub = document.getElementById('share-hub');
@@ -151,55 +153,52 @@
 
         function renderHub() {
             const list = document.getElementById('hub-list');
-            if (recentVaults.length === 0) {
-                list.innerHTML = '<p style="color:#7f8c8d; font-size:0.8em; text-align: center;">No active vaults.</p>';
+            if (vaultHistory.length === 0) {
+                list.innerHTML = '<p style="color:#7f8c8d; font-size:0.8em; text-align: center;">No history found.</p>';
                 return;
             }
-            list.innerHTML = recentVaults.map((v, i) => `
+            list.innerHTML = vaultHistory.map((v, i) => `
                 <div class="hub-item">
-                    <span style="font-size: 0.8em;">📄 ${v.name.substring(0, 12)}...</span>
-                    <div style="display:flex; gap:15px;">
-                        <span style="cursor:pointer;" onclick="smartShare(${i})">📤</span>
-                        <span style="cursor:pointer; filter:grayscale(1);" onclick="deleteItem(${i})">🗑️</span>
+                    <span style="font-size: 0.75em;">📄 ${v.name.substring(0, 15)}</span>
+                    <div style="display:flex; gap:12px;">
+                        <span style="cursor:pointer;" onclick="downloadFromHistory(${i})">📥</span>
+                        <span style="cursor:pointer; color:#e74c3c;" onclick="deleteFromHistory(${i})">🗑️</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function smartShare(i) {
-            const v = recentVaults[i];
-            if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
-                try {
-                    const file = new File([v.blob], v.name, { type: "text/html" });
-                    await navigator.share({ files: [file], title: 'EncMaster Vault' });
-                    return; 
-                } catch (err) {}
-            }
+        function downloadFromHistory(i) {
+            const v = vaultHistory[i];
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(v.blob);
+            a.href = v.content;
             a.download = v.name;
             a.click();
-            alert("Vault re-downloaded!");
         }
 
-        function deleteItem(i) { 
-            recentVaults.splice(i, 1); 
-            renderHub(); 
+        function deleteFromHistory(i) {
+            vaultHistory.splice(i, 1);
+            localStorage.setItem('encmaster_history', JSON.stringify(vaultHistory));
+            renderHub();
         }
 
-        function clearHub() { 
-            recentVaults = []; 
-            renderHub(); 
+        function clearPermanentHub() {
+            if(confirm("Confirm Wipe: Delete all saved vault history?")) {
+                vaultHistory = [];
+                localStorage.removeItem('encmaster_history');
+                renderHub();
+            }
         }
 
         function generateVault() {
             const file = document.getElementById('f').files[0];
             const pass = document.getElementById('p').value;
             if (!pass) { alert("Set password!"); return; }
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const vault = createHTMLVault(file.name, e.target.result, file.type, pass);
-                processVault(file.name + "_VAULT.html", vault);
+                saveToHistory(file.name + "_VAULT.html", vault);
             };
             reader.readAsDataURL(file);
         }
@@ -208,80 +207,80 @@
             const note = document.getElementById('note').value;
             const pass = document.getElementById('p').value;
             if (!pass || !note) { alert("Input required!"); return; }
+            
             const data = "data:text/plain;base64," + btoa(note);
             const vault = createHTMLVault("Note", data, "text/plain", pass);
-            processVault("Note_VAULT.html", vault);
+            saveToHistory("Note_VAULT.html", vault);
         }
 
-        function processVault(name, content) {
-            const blob = new Blob([content], {type: "text/html"});
-            recentVaults.push({ name, blob });
+        function saveToHistory(name, content) {
+            const dataUrl = "data:text/html;base64," + btoa(content);
+            const newEntry = { name: name, content: dataUrl };
+            vaultHistory.unshift(newEntry);
+            localStorage.setItem('encmaster_history', JSON.stringify(vaultHistory));
+            
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
+            a.href = dataUrl;
             a.download = name;
             a.click();
-            document.getElementById('status').innerText = "✅ Vault Created!";
+            
+            document.getElementById('status').innerText = "✅ Saved to Hub!";
             renderHub();
         }
 
-        // --- EXPANDED VAULT WRAPPER (READABLE) ---
+        // --- EXPANDED VAULT BUILDER ---
         function createHTMLVault(name, data, type, pass) {
-            let vaultCode = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>🔐 Vault</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; }
-                    .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #2ecc71; display: inline-block; width: 100%; max-width: 500px; }
-                    input { width: 80%; padding: 15px; margin: 20px; border-radius: 10px; border: none; text-align: center; background: #1a252f; color: white; }
-                    button { padding: 15px 30px; background: #2ecc71; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
-                </style>
-            </head>
-            <body>
-                <div id="lock">
-                    <div class="box">
-                        <h2>🔐 EncMaster Vault</h2>
-                        <p>File: ${name}</p>
-                        <input type="password" id="pass" placeholder="Enter Password">
-                        <br>
-                        <button onclick="unlock()">UNLOCK</button>
-                    </div>
-                </div>
-                <div id="view" style="display:none">
-                    <h2 style="color:#2ecc71">✅ Access Granted</h2>
-                    <div id="media"></div>
-                </div>
-                <script>
-                    function unlock() {
-                        const inputPass = document.getElementById('pass').value;
-                        if(inputPass === '${pass}') {
-                            document.getElementById('lock').style.display = 'none';
-                            document.getElementById('view').style.display = 'block';
-                            const m = document.getElementById('media');
-                            const d = "${data}";
-                            const t = "${type}";
-                            
-                            if(t.includes('audio')) {
-                                m.innerHTML = '<audio controls autoplay style="width:100%"><source src="'+d+'"></audio>';
-                            } else if(t.includes('video')) {
-                                m.innerHTML = '<video controls autoplay style="width:100%"><source src="'+d+'"></video>';
-                            } else if(t.includes('image')) {
-                                m.innerHTML = '<img src="'+d+'" style="max-width:100%; border-radius:10px;">';
-                            } else if(t.includes('text')) {
-                                m.innerHTML = '<div style="background:#1a252f; padding:20px; border-radius:10px; text-align:left; white-space:pre-wrap;">' + atob(d.split(',')[1]) + '</div>';
-                            } else {
-                                m.innerHTML = '<p>Preview unavailable.</p><a href="'+d+'" download="${name}" style="color:#2ecc71">Download Original</a>';
-                            }
-                        } else {
-                            alert('Wrong Password!');
-                        }
-                    }
-                <\/script>
-            </body>
-            </html>`;
-            return vaultCode;
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔐 Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #1a252f; color: white; text-align: center; padding: 50px 20px; }
+        .box { background: #2c3e50; padding: 30px; border-radius: 20px; border: 2px solid #2ecc71; display: inline-block; width: 100%; max-width: 500px; }
+        input { width: 80%; padding: 15px; margin: 20px; border-radius: 10px; border: none; text-align: center; background: #1a252f; color: white; }
+        button { padding: 15px 30px; background: #2ecc71; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="lock">
+        <div class="box">
+            <h2>🔐 EncMaster Vault</h2>
+            <p>File: ${name}</p>
+            <input type="password" id="pass" placeholder="Enter Password">
+            <br>
+            <button onclick="unlock()">UNLOCK</button>
+        </div>
+    </div>
+    <div id="view" style="display:none">
+        <h2 style="color:#2ecc71">✅ Access Granted</h2>
+        <div id="media"></div>
+    </div>
+    <script>
+        function unlock() {
+            if(document.getElementById('pass').value === '${pass}') {
+                document.getElementById('lock').style.display = 'none';
+                document.getElementById('view').style.display = 'block';
+                const m = document.getElementById('media');
+                const d = "${data}";
+                const t = "${type}";
+                if(t.includes('audio')) {
+                    m.innerHTML = '<audio controls autoplay style="width:100%"><source src="'+d+'"></audio>';
+                } else if(t.includes('video')) {
+                    m.innerHTML = '<video controls autoplay style="width:100%"><source src="'+d+'"></video>';
+                } else if(t.includes('image')) {
+                    m.innerHTML = '<img src="'+d+'" style="max-width:100%; border-radius:10px;">';
+                } else if(t.includes('text')) {
+                    m.innerHTML = '<div style="background:#1a252f; padding:20px; border-radius:10px; text-align:left; white-space:pre-wrap;">' + atob(d.split(',')) + '</div>';
+                } else {
+                    m.innerHTML = '<p>Preview unavailable.</p><a href="'+d+'" download="${name}" style="color:#2ecc71">Download Original</a>';
+                }
+            } else { alert('Wrong Password!'); }
+        }
+    <\/script>
+</body>
+</html>`;
         }
     </script>
 </body>
